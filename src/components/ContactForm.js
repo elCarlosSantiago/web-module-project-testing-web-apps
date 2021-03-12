@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useFormWithErrors from '../hooks/useForm';
 import DisplayComponent from './DisplayComponent';
 
 const formData = {
@@ -16,59 +17,13 @@ const errorData = {
 };
 
 const ContactForm = () => {
-  const [displayData, setDisplayData] = useState(false);
-  const [form, setForm] = useState(formData);
-  const [errors, setErrors] = useState(errorData);
-
-  const errorHandling = (fieldName, fieldValue) => {
-    if (fieldName === 'firstName' && fieldValue.length < 5)
-      return `${fieldName} must have at least 5 characters.`;
-
-    const emailRegex = /(.*)@(.*)\.(.+)/g;
-    if (fieldName === 'email' && !fieldValue.match(emailRegex))
-      return `${fieldName} must be a valid email address.`;
-
-    if (fieldName !== 'message' && fieldValue === '')
-      return `${fieldName} is a required field.`;
-
-    return '';
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const submitErrors = {};
-    Object.keys(errors).forEach((field) => {
-      submitErrors[field] = errorHandling(field, form[field]);
-    });
-
-    setErrors(submitErrors);
-
-    const hasErrors =
-      submitErrors.firstName === '' &&
-      submitErrors.lastName === '' &&
-      submitErrors.email === '' &&
-      submitErrors.message === '';
-    setDisplayData(hasErrors);
-  };
-
-  const handleChange = (e) => {
-    const errorMessage = errorHandling(e.target.name, e.target.value);
-
-    if (errorMessage !== '') {
-      setDisplayData(false);
-    }
-
-    setErrors({
-      ...errors,
-      [e.target.name]: errorMessage,
-    });
-
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [
+    form,
+    errors,
+    handleFormChanges,
+    handleSubmit,
+    displayData,
+  ] = useFormWithErrors(formData, errorData);
 
   return (
     <div className="App">
@@ -77,7 +32,7 @@ const ContactForm = () => {
         <div>
           <label htmlFor="firstName">First Name*</label>
           <input
-            onChange={handleChange}
+            onChange={handleFormChanges}
             name="firstName"
             value={form.firstName}
             id="firstName"
@@ -91,7 +46,7 @@ const ContactForm = () => {
         <div>
           <label htmlFor="lastName">Last Name*</label>
           <input
-            onChange={handleChange}
+            onChange={handleFormChanges}
             id="lastName"
             name="lastName"
             value={form.lastName}
@@ -105,7 +60,7 @@ const ContactForm = () => {
         <div>
           <label htmlFor="email">Email*</label>
           <input
-            onChange={handleChange}
+            onChange={handleFormChanges}
             id="email"
             name="email"
             value={form.email}
@@ -117,7 +72,7 @@ const ContactForm = () => {
         <div>
           <label htmlFor="message">Message</label>
           <textarea
-            onChange={handleChange}
+            onChange={handleFormChanges}
             name="message"
             id="message"
             value={form.message}
